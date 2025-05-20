@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teachable Machine Demo</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- TensorFlow.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+</head>
+<body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen p-4">
+  <h1 class="text-2xl font-bold mb-4">Teachable Machine Image Classification</h1>
+  <!-- Video element to display webcam feed -->
+  <video id="webcam" autoplay playsinline width="224" height="224" class="rounded shadow mb-4"></video>
+  <!-- Button to trigger prediction -->
+  <button id="predict" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mb-4">Predict</button>
+  <!-- Paragraph to display prediction result -->
+  <p id="result" class="text-lg font-medium text-gray-700">Prediction: ...</p>
+
+  <!-- Include the script -->
+  <script src="script.js"></script>
+</body>
+</html>
