@@ -8,7 +8,7 @@ async function init() {
   try {
     // Load the Teachable Machine model
     const modelURL =
-      "https://teachablemachine.withgoogle.com/models/your_model_url/model.json"; // Replace with your model's URL
+      "https://teachablemachine.withgoogle.com/models/7cEccJReh/model.json"; // Replace with your model's URL
     model = await tf.loadGraphModel(modelURL);
 
     // Access the user's webcam
