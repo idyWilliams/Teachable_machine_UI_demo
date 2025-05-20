@@ -1,5 +1,3 @@
-// script.js
-
 let model; // Variable to hold the loaded model
 let webcamElement = document.getElementById("webcam"); // Webcam video element
 
