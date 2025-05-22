@@ -1,13 +1,67 @@
-let model; // Variable to hold the loaded model
-let webcamElement = document.getElementById("webcam"); // Webcam video element
+// Variables to hold the model and webcam element
+let model;
+let webcamElement = document.getElementById("webcam");
+const statusElement = document.getElementById("result");
 
-// Async function to initialize the webcam and load the model
+// Create a simple model for demonstration
+async function createDemoModel() {
+  // Create a sequential model for image recognition (3 classes)
+  const model = tf.sequential();
+
+  // Add convolutional layers
+  model.add(
+    tf.layers.conv2d({
+      inputShape: [224, 224, 3],
+      filters: 16,
+      kernelSize: 3,
+      activation: "relu",
+    })
+  );
+
+  model.add(
+    tf.layers.maxPooling2d({
+      poolSize: 2,
+      strides: 2,
+    })
+  );
+
+  model.add(
+    tf.layers.conv2d({
+      filters: 32,
+      kernelSize: 3,
+      activation: "relu",
+    })
+  );
+
+  model.add(
+    tf.layers.maxPooling2d({
+      poolSize: 2,
+      strides: 2,
+    })
+  );
+
+  model.add(tf.layers.flatten());
+  model.add(tf.layers.dense({ units: 64, activation: "relu" }));
+  model.add(tf.layers.dense({ units: 3, activation: "softmax" })); // 3 output classes
+
+  // Compile the model
+  model.compile({
+    optimizer: "adam",
+    loss: "categoricalCrossentropy",
+    metrics: ["accuracy"],
+  });
+
+  console.log("Demo model created successfully");
+  return model;
+}
+
+// Async function to initialize the webcam and create/load the model
 async function init() {
   try {
-    // Load the Teachable Machine model
-    const modelURL =
-      "https://teachablemachine.withgoogle.com/models/7cEccJReh/";
-    model = await tf.loadLayersModel(modelURL + "model.json");
+    statusElement.innerText = "Initializing camera and model...";
+
+    // Create our demo model
+    model = await createDemoModel();
 
     // Access the user's webcam
     const stream = await navigator.mediaDevices.getUserMedia({
@@ -26,11 +80,14 @@ async function init() {
     });
 
     console.log("Application initialized successfully");
+    statusElement.innerText =
+      "Ready! (Using a simple demo model - click Predict)";
 
     // Enable the predict button once everything is loaded
     document.getElementById("predict").disabled = false;
   } catch (error) {
     console.error("Error initializing the application:", error);
+    statusElement.innerText = "Error: " + error.message;
   }
 }
 
@@ -39,26 +96,30 @@ async function predict() {
   try {
     // Make sure webcam is properly loaded
     if (!webcamElement.videoWidth || !webcamElement.videoHeight) {
-      console.error("Video dimensions are not available yet");
+      statusElement.innerText = "Camera not ready yet";
       return;
     }
 
     // Ensure the model is loaded
     if (!model) {
-      console.error("Model not loaded yet");
+      statusElement.innerText = "Model not loaded yet";
       return;
     }
 
     // Display processing status
-    document.getElementById("result").innerText = "Processing...";
+    statusElement.innerText = "Processing...";
 
     // Capture the current frame from the webcam
     const tensor = tf.tidy(() => {
       // Create tensor from webcam feed
       const img = tf.browser.fromPixels(webcamElement);
 
+      // Log the shape to debug
+      console.log("Original image shape:", img.shape);
+
       // Resize to the model's expected input size
       const resized = tf.image.resizeBilinear(img, [224, 224]);
+      console.log("Resized shape:", resized.shape);
 
       // Normalize the image (convert pixel values from 0-255 to 0-1)
       const normalized = resized.div(255.0);
@@ -67,26 +128,35 @@ async function predict() {
       return normalized.expandDims(0);
     });
 
+    console.log("Final tensor shape (should be [1,224,224,3]):", tensor.shape);
+
     // Perform prediction
     const predictions = await model.predict(tensor).data();
     tensor.dispose(); // Clean up the tensor to prevent memory leaks
 
-    // Find the class with the highest probability
-    const highestProbability = Math.max(...predictions);
-    const predictedIndex = predictions.indexOf(highestProbability);
+    // Since this is a demo model with random weights, the predictions won't be meaningful
+    // But we'll display them anyway for demonstration purposes
+    const classNames = ["Class A", "Class B", "Class C"];
 
-    // Get class names if available (modify this based on your model's classes)
-    const classNames = ["Class 0", "Class 1", "Class 2"]; // Replace with your actual class names
-    const className = classNames[predictedIndex] || `Class ${predictedIndex}`;
+    // Create a nicely formatted output of all probabilities
+    let resultHTML = `<div class="mt-2">`;
+    for (let i = 0; i < predictions.length; i++) {
+      const probability = (predictions[i] * 100).toFixed(2);
+      resultHTML += `<div class="flex items-center mb-2">
+        <div class="w-24">${classNames[i]}:</div>
+        <div class="w-16 text-right mr-2">${probability}%</div>
+        <div class="flex-grow bg-gray-200 rounded-full h-2.5">
+          <div class="bg-blue-600 h-2.5 rounded-full" style="width: ${probability}%"></div>
+        </div>
+      </div>`;
+    }
+    resultHTML += `</div>`;
 
     // Display the prediction result
-    document.getElementById("result").innerText = `Prediction: ${className} (${(
-      highestProbability * 100
-    ).toFixed(2)}%)`;
+    statusElement.innerHTML = `Demo Model Prediction: ${resultHTML}`;
   } catch (error) {
     console.error("Error during prediction:", error);
-    document.getElementById("result").innerText =
-      "Error during prediction. See console for details.";
+    statusElement.innerText = "Error during prediction: " + error.message;
   }
 }
 
