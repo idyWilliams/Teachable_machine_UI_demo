@@ -7,43 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.18.0/dist/tf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
-    body {
-      font-family: 'Inter', sans-serif;
-    }
-
-    .glass-card {
-      background: rgba(255, 255, 255, 0.25);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    .webcam-container {
-      border-radius: 20px;
-      overflow: hidden;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-    }
-
-    .prediction-bar {
-      transition: all 0.3s ease;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    }
-
-    .gradient-bg {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    }
-
-    .pulse-animation {
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.7; }
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body class="min-h-screen gradient-bg flex flex-col items-center justify-center p-4">
   <div class="glass-card rounded-3xl p-8 max-w-2xl w-full shadow-2xl">
@@ -84,8 +48,20 @@
 
     <!-- Predictions Container -->
     <div id="predictions-container" class="space-y-3 hidden">
-      <h3 class="text-white font-semibold text-lg text-center mb-4">Live Predictions</h3>
+      <h3 class="text-white font-semibold text-lg text-center mb-4">🎯 Recognition Results</h3>
       <div id="label-container"></div>
+
+      <!-- Real-world Applications Info -->
+      <div class="mt-8 bg-white bg-opacity-10 rounded-xl p-4">
+        <h4 class="text-white font-semibold mb-2">💡 Real-World Applications</h4>
+        <div class="text-white text-sm space-y-1 text-opacity-90">
+          <p>• <strong>Security Systems:</strong> Facial recognition for access control</p>
+          <p>• <strong>Retail:</strong> Customer identification for personalized service</p>
+          <p>• <strong>Healthcare:</strong> Patient identification and monitoring</p>
+          <p>• <strong>Education:</strong> Attendance tracking in classrooms</p>
+          <p>• <strong>Smart Homes:</strong> Personalized settings for family members</p>
+        </div>
+      </div>
     </div>
 
     <!-- Error Container -->
@@ -100,225 +76,6 @@
     </div>
   </div>
 
-  <script>
-    const URL = "https://teachablemachine.withgoogle.com/models/rR4VGg7Q9/";
-
-    let model, webcam, labelContainer, maxPredictions;
-    let isRunning = false;
-
-    // Update status message
-    function updateStatus(message, isError = false) {
-      const statusDiv = document.getElementById("status");
-      const className = isError ?
-        "bg-red-100 bg-opacity-20 border border-red-400 rounded-xl p-4" :
-        "bg-white bg-opacity-20 rounded-xl p-4";
-
-      statusDiv.innerHTML = `
-        <div class="${className}">
-          <p class="text-white font-medium">${message}</p>
-        </div>
-      `;
-
-      // Also update error message if it's an error
-      if (isError) {
-        const errorMessage = document.getElementById("error-message");
-        if (errorMessage) {
-          errorMessage.textContent = message.replace(/❌|⚠️/g, '').trim();
-        }
-      }
-    }
-
-    // Wait for libraries to load
-    function waitForLibraries() {
-      return new Promise((resolve, reject) => {
-        let attempts = 0;
-        const maxAttempts = 50;
-
-        const checkLibraries = () => {
-          attempts++;
-          if (typeof tf !== 'undefined' && typeof tmImage !== 'undefined') {
-            resolve();
-          } else if (attempts >= maxAttempts) {
-            reject(new Error('Libraries failed to load'));
-          } else {
-            setTimeout(checkLibraries, 100);
-          }
-        };
-
-        checkLibraries();
-      });
-    }
-
-    async function init() {
-      try {
-        updateStatus("📚 Loading AI libraries...");
-
-        // Wait for libraries to load
-        await waitForLibraries();
-
-        updateStatus("🔄 Loading AI model...");
-
-        const modelURL = URL + "model.json";
-        const metadataURL = URL + "metadata.json";
-
-        // Load the model
-        model = await tmImage.load(modelURL, metadataURL);
-        maxPredictions = model.getTotalClasses();
-
-        updateStatus("📷 Initializing camera...");
-
-        // Setup webcam
-        const flip = true;
-        webcam = new tmImage.Webcam(300, 300, flip);
-        await webcam.setup();
-        await webcam.play();
-
-        // Add webcam to DOM
-        const webcamContainer = document.getElementById("webcam-container");
-        webcamContainer.innerHTML = "";
-        webcam.canvas.style.borderRadius = "15px";
-        webcamContainer.appendChild(webcam.canvas);
-
-        // Setup prediction labels
-        labelContainer = document.getElementById("label-container");
-        labelContainer.innerHTML = "";
-
-        for (let i = 0; i < maxPredictions; i++) {
-          const predictionDiv = document.createElement("div");
-          predictionDiv.className = "bg-white bg-opacity-20 rounded-xl p-3 mb-2";
-          predictionDiv.innerHTML = `
-            <div class="flex justify-between items-center">
-              <span class="text-white font-medium">Loading...</span>
-              <span class="text-white text-sm">0%</span>
-            </div>
-            <div class="w-full bg-white bg-opacity-20 rounded-full h-2 mt-2">
-              <div class="prediction-bar h-2 rounded-full" style="width: 0%"></div>
-            </div>
-          `;
-          labelContainer.appendChild(predictionDiv);
-        }
-
-        // Show predictions container
-        document.getElementById("predictions-container").classList.remove("hidden");
-        document.getElementById("error-container").classList.add("hidden");
-
-        updateStatus("✅ AI Vision Active - Analyzing in real-time");
-
-        // Update button
-        document.getElementById("buttonText").textContent = "⏹️ Stop Camera";
-        isRunning = true;
-
-        // Start prediction loop
-        window.requestAnimationFrame(loop);
-
-      } catch (error) {
-        console.error("Initialization error:", error);
-        updateStatus("❌ Error loading model or accessing camera", true);
-        document.getElementById("error-container").classList.remove("hidden");
-        document.getElementById("buttonText").textContent = "🔄 Try Again";
-        isRunning = false;
-      }
-    }
-
-    async function loop() {
-      if (isRunning && webcam) {
-        webcam.update();
-        await predict();
-        window.requestAnimationFrame(loop);
-      }
-    }
-
-    async function predict() {
-      try {
-        const prediction = await model.predict(webcam.canvas);
-
-        for (let i = 0; i < maxPredictions; i++) {
-          const probability = (prediction[i].probability * 100);
-          const className = prediction[i].className;
-
-          const predictionDiv = labelContainer.children[i];
-          const progressBar = predictionDiv.querySelector('.prediction-bar');
-
-          predictionDiv.innerHTML = `
-            <div class="flex justify-between items-center">
-              <span class="text-white font-medium">${className}</span>
-              <span class="text-white text-sm">${probability.toFixed(1)}%</span>
-            </div>
-            <div class="w-full bg-white bg-opacity-20 rounded-full h-2 mt-2">
-              <div class="prediction-bar h-2 rounded-full transition-all duration-300" style="width: ${probability}%"></div>
-            </div>
-          `;
-
-          // Highlight the highest prediction
-          if (probability > 50) {
-            predictionDiv.classList.add('ring-2', 'ring-white', 'ring-opacity-50');
-          } else {
-            predictionDiv.classList.remove('ring-2', 'ring-white', 'ring-opacity-50');
-          }
-        }
-      } catch (error) {
-        console.error("Prediction error:", error);
-      }
-    }
-
-    function stopCamera() {
-      if (webcam) {
-        webcam.stop();
-      }
-      isRunning = false;
-      document.getElementById("predictions-container").classList.add("hidden");
-      document.getElementById("webcam-container").innerHTML = "";
-      document.getElementById("buttonText").textContent = "🚀 Start Camera";
-      updateStatus("Ready to start classification");
-    }
-
-    function toggleCamera() {
-      if (isRunning) {
-        stopCamera();
-      } else {
-        init();
-      }
-    }
-
-    // Check camera permissions on page load
-    async function checkCameraPermissions() {
-      try {
-        // Request camera access
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        // Stop the test stream immediately
-        stream.getTracks().forEach(track => track.stop());
-        updateStatus("📸 Camera access granted - Ready to start!");
-        document.getElementById("error-container").classList.add("hidden");
-        return true;
-      } catch (error) {
-        console.error("Camera permission error:", error);
-        if (error.name === 'NotAllowedError') {
-          updateStatus("❌ Camera access denied. Please allow camera permissions.", true);
-        } else if (error.name === 'NotFoundError') {
-          updateStatus("❌ No camera found. Please connect a camera device.", true);
-        } else if (error.name === 'NotSupportedError') {
-          updateStatus("⚠️ Camera not supported. Please use HTTPS or localhost.", true);
-        } else {
-          updateStatus("❌ Camera access error. Please check your browser settings.", true);
-        }
-        document.getElementById("error-container").classList.remove("hidden");
-        return false;
-      }
-    }
-
-    // Auto-check permissions when page loads
-    window.addEventListener('load', async () => {
-      // Wait a bit for libraries to load
-      setTimeout(async () => {
-        await checkCameraPermissions();
-
-        // Check if libraries are loaded
-        if (typeof tmImage === 'undefined') {
-          updateStatus("❌ AI libraries failed to load. Please refresh the page.", true);
-          document.getElementById("error-container").classList.remove("hidden");
-        }
-      }, 2000);
-    });
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
