@@ -3,7 +3,7 @@
 // ========================================
 
 // Important!!: Replace with your Teachable Machine model URL
-const MODEL_URL = "https://teachablemachine.withgoogle.com/models/rR4VGg7Q9/";
+const MODEL_URL = "https://teachablemachine.withgoogle.com/models/KJ5GY6eT8/";
 
 // Configuration
 const CONFIG = {
