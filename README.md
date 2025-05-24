@@ -1,8 +1,8 @@
-# 🤖 AI Vision Classifier
+# 🤖 Teachable Machine Demo
 
 A modern, responsive web application for real-time image classification using Google's Teachable Machine. Perfect for facial recognition, object detection, and custom image classification tasks.
 
-![AI Vision Classifier](https://via.placeholder.com/800x400/667eea/ffffff?text=AI+Vision+Classifier)
+![Teachable Machine Demo](https://via.placeholder.com/800x400/667eea/ffffff?text=AI+Vision+Classifier)
 
 ## ✨ Features
 
@@ -17,8 +17,8 @@ A modern, responsive web application for real-time image classification using Go
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/yourusername/ai-vision-classifier.git
-cd ai-vision-classifier
+git clone https://github.com/idyWilliams/Teachable_machine_UI_demo
+cd Teachable_machine_UI_demo
 ```
 
 ### 2. Get Your Teachable Machine Model
@@ -196,8 +196,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🆘 Support
 
 - 📧 Email: widorenyin0@gmail.com
-- 🐛 Issues: [GitHub Issues](https://github.com/yourusername/ai-vision-classifier/issues)
-- 💬 Discussions: [GitHub Discussions](https://github.com/yourusername/ai-vision-classifier/discussions)
+- 🐛 Issues: [GitHub Issues](https://github.com/idyWilliams/Teachable_machine_UI_demo/issues)
+- 💬 Discussions: [GitHub Discussions](https://github.com/idyWilliams/Teachable_machine_UI_demo/discussions)
 
 ## 🙏 Acknowledgments
 
@@ -207,4 +207,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Made with ❤️ for the AI community**
+**Made with ❤️ for the AI community by [Williams](https://www.linkedin.com/in/idorenyin-williams/)**

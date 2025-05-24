@@ -2,7 +2,7 @@
 // AI VISION CLASSIFIER - TEACHABLE MACHINE
 // ========================================
 
-// TODO: Replace with your Teachable Machine model URL
+// Important!!: Replace with your Teachable Machine model URL
 const MODEL_URL = "https://teachablemachine.withgoogle.com/models/rR4VGg7Q9/";
 
 // Configuration
